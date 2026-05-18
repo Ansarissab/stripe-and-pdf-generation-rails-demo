@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. All custom colors, spacing, and fonts live here so the
- * palette stays consistent across the app and is changeable in one place.
+ * Design tokens. All custom colors live here so the palette stays
+ * consistent and is changeable in one place. Tailwind v4 auto-generates
+ * utility classes from these (`--color-brand` → `bg-brand`, `text-brand`,
+ * `border-brand`, `ring-brand`), so views and components reference the
+ * named utilities rather than `var(--color-brand)` or bracket syntax.
  */
 @theme {
   --color-brand:        #635bff;
@@ -18,40 +21,58 @@
   --color-text-muted:   #6b7280;
 }
 
-/*
- * Shared component classes. Every reusable visual primitive is defined
- * here so views can stay free of Tailwind utility soup. Add a class here
- * before sprinkling utilities in templates.
- */
+/* Button + flash primitives — kept as @utility so the variant classes below
+   can @apply them. In Tailwind v4, @apply only resolves utilities, not other
+   component-layer classes. */
+@utility btn {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium
+         transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+@utility flash {
+  @apply mb-4 px-4 py-3 rounded-md border text-sm;
+}
+
 @layer components {
   /* Page chrome */
   .page          { @apply mx-auto max-w-4xl px-5 py-12; }
-  .h-page        { @apply text-3xl font-bold text-[--color-text] mb-6; }
-  .h-section     { @apply text-xl font-semibold text-[--color-text] mb-4; }
-  .card          { @apply bg-[--color-surface] border border-[--color-border] rounded-lg shadow-sm p-6; }
-  .muted         { @apply text-[--color-text-muted]; }
+  .h-page        { @apply text-3xl font-bold text-text mb-6; }
+  .h-section     { @apply text-xl font-semibold text-text mb-4; }
+  .card          { @apply bg-surface border border-border rounded-lg shadow-sm p-6; }
+  .muted         { @apply text-text-muted; }
 
   /* Forms */
   .form          { @apply space-y-4; }
   .form-field    { @apply flex flex-col; }
-  .form-label    { @apply text-sm font-medium text-[--color-text] mb-1; }
-  .form-input    { @apply w-full px-3 py-2 bg-white border border-[--color-border] rounded-md
-                          focus:outline-none focus:ring-2 focus:ring-[--color-brand] focus:border-[--color-brand]; }
-  .form-hint     { @apply text-sm text-[--color-text-muted] mt-1; }
-  .form-errors   { @apply rounded-md border border-[--color-alert] bg-[--color-alert-soft] p-3 text-sm text-[--color-alert]; }
+  .form-label    { @apply text-sm font-medium text-text mb-1; }
+  .form-input    { @apply w-full px-3 py-2 bg-white border border-border rounded-md
+                          focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand; }
+  .form-hint     { @apply text-sm text-text-muted mt-1; }
+  .form-errors   { @apply rounded-md border border-alert bg-alert-soft p-3 text-sm text-alert; }
 
   /* Buttons */
-  .btn           { @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium
-                          transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2; }
-  .btn-primary   { @apply btn bg-[--color-brand] text-white hover:bg-[--color-brand-dark]
-                          focus:ring-[--color-brand]; }
-  .btn-secondary { @apply btn bg-white text-[--color-text] border border-[--color-border]
-                          hover:bg-[--color-surface-muted] focus:ring-[--color-border]; }
-  .btn-danger    { @apply btn bg-[--color-alert] text-white hover:bg-red-700 focus:ring-[--color-alert]; }
-  .btn-link      { @apply text-[--color-brand] hover:underline; }
+  .btn-primary   { @apply btn bg-brand text-white hover:bg-brand-dark focus:ring-brand; }
+  .btn-secondary { @apply btn bg-white text-text border border-border
+                          hover:bg-surface-muted focus:ring-border; }
+  .btn-danger    { @apply btn bg-alert text-white hover:bg-red-700 focus:ring-alert; }
+  .btn-link      { @apply text-brand hover:underline; }
+  .btn-icon      { @apply inline-flex items-center justify-center w-9 h-9 rounded-md
+                          bg-white border border-border text-text
+                          hover:bg-surface-muted hover:text-brand
+                          focus:outline-none focus:ring-2 focus:ring-brand transition-colors; }
 
   /* Flash */
-  .flash         { @apply mb-4 px-4 py-3 rounded-md border text-sm; }
-  .flash-notice  { @apply flash bg-[--color-notice-soft] border-[--color-notice] text-[--color-notice]; }
-  .flash-alert   { @apply flash bg-[--color-alert-soft]  border-[--color-alert]  text-[--color-alert]; }
+  .flash-notice  { @apply flash bg-notice-soft border-notice text-notice; }
+  .flash-alert   { @apply flash bg-alert-soft  border-alert  text-alert; }
+
+  /* Subscription plan tiles */
+  .plan-card     { @apply flex flex-col gap-4 p-6 bg-surface border border-border rounded-lg shadow-sm; }
+  .plan-card.is-current { @apply border-brand ring-2 ring-brand; }
+  .plan-price    { @apply text-3xl font-bold text-text; }
+
+  /* Tooltip (CSS-only, parent must be `group relative`) */
+  .tooltip       { @apply pointer-events-none absolute top-full mt-2 left-1/2 -translate-x-1/2
+                          whitespace-nowrap rounded-md bg-text text-white text-xs px-2 py-1
+                          opacity-0 group-hover:opacity-100 group-focus-within:opacity-100
+                          transition-opacity z-10; }
 }

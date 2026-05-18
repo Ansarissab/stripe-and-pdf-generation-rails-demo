@@ -1,0 +1,25 @@
+- content_for :title, "Choose a plan"
+
+.card.mb-6
+  h1.h-page Choose a plan
+  p.muted Pick a tier, then pick the experience: redirect to Stripe's hosted Checkout page, or pay inline with Stripe Elements embedded in this app. Both are real subscriptions and produce real invoices.
+
+.grid.gap-4.md:grid-cols-2
+  - %i[basic pro].each do |plan_key|
+    - current = current_user.plan == plan_key.to_s
+    .plan-card class=(current ? "is-current" : "")
+      .flex.items-center.justify-between
+        h2.h-section.mb-0 = plan_key.to_s.titleize
+        - if current
+          span.text-sm.font-medium.text-brand Current
+      p.plan-price = plan_price_label(plan_key)
+      p.muted.text-sm = (plan_key == :basic ? "Starter tier. Invoices, PDF downloads." : "Everything in Basic, plus priority support.")
+
+      .grid.gap-2.mt-2
+        = button_to "Pay with hosted Checkout", account_subscription_path(plan: plan_key), method: :post, class: "btn-primary w-full", form: { data: { turbo: false } }
+        = button_to "Pay with embedded form",   embedded_account_subscription_path(plan: plan_key), method: :post, class: "btn-secondary w-full", form: { data: { turbo: false } }
+
+p.muted.text-sm.mt-6
+  | Test card: 4242 4242 4242 4242, any future expiry, any CVC, any postal code.
+  br
+  | Use 4000 0025 0000 3155 to exercise 3D Secure.

@@ -1,0 +1,35 @@
+- content_for :title, "Subscription"
+
+.card
+  h1.h-page Subscription
+  p.muted.mb-4 Manage your plan, switch tiers, or cancel.
+
+  h2.h-section Current state
+  - if @subscription
+    dl.grid.grid-cols-2.gap-y-2.text-sm.mb-6
+      dt.muted Plan
+      dd = plan_badge(current_user)
+
+      dt.muted Status
+      dd = @subscription.status.titleize
+
+      dt.muted Started
+      dd = @subscription.created_at&.to_date
+
+      - if @subscription.current_period_end
+        dt.muted Renews
+        dd = @subscription.current_period_end.to_date
+
+      - if @subscription.ends_at
+        dt.muted Ends
+        dd = @subscription.ends_at.to_date
+
+    .flex.flex-wrap.gap-3
+      = button_to "Open Stripe billing portal", billing_portal_account_subscription_path, method: :post, class: "btn-secondary", form: { data: { turbo: false } }
+      - if @subscription.active?
+        = button_to "Cancel subscription", account_subscription_path, method: :delete, class: "btn-danger", form: { data: { turbo_confirm: "Cancel at period end?" } }
+      = link_to "Change plan", new_account_subscription_path, class: "btn-link"
+  - else
+    p.mb-4 = plan_badge(current_user)
+    p.muted.mb-4 You don't have an active subscription yet.
+    = link_to "Choose a plan", new_account_subscription_path, class: "btn-primary"

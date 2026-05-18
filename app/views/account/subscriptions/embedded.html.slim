@@ -1,0 +1,22 @@
+- content_for :title, "Complete your subscription"
+
+.card
+  h1.h-page Complete your subscription
+  p.muted.mb-4
+    | Plan:
+    strong.text-text  #{@plan.to_s.titleize}
+    |  — #{plan_price_label(@plan)}.
+    |  Paid inline with Stripe Elements; no redirect.
+
+  div(data-controller="stripe-elements"
+      data-stripe-elements-publishable-key-value=ENV.fetch("STRIPE_PUBLIC_KEY", "")
+      data-stripe-elements-client-secret-value=@client_secret
+      data-stripe-elements-return-url-value="#{request.base_url.chomp('/')}#{success_account_subscription_path}")
+    form.space-y-4(data-stripe-elements-target="form")
+      #payment-element(data-stripe-elements-target="paymentElement")
+      .form-errors.hidden(data-stripe-elements-target="errors")
+      button.btn-primary.w-full(type="submit" data-stripe-elements-target="submit")
+        | Pay #{plan_price_label(@plan)}
+
+  p.muted.text-sm.mt-4
+    = link_to "← Back to plan picker", new_account_subscription_path, class: "btn-link"

@@ -56,6 +56,9 @@ gem "stripe", "19.1.0"
 gem "hexapdf", "1.8.0"
 
 group :development, :test do
+  # Loads local secrets from .env (.env is gitignored; .env.example is the committed template)
+  gem "dotenv-rails", "3.2.0"
+
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 

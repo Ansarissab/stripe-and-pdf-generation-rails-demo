@@ -7,8 +7,12 @@
 # Ignore bundler config.
 /.bundle
 
-# Ignore all environment files.
+# Ignore all environment files (.env.example is the committed template).
 /.env*
+!/.env.example
+
+# Ignore Kamal deploy secrets (filled in locally, never committed).
+/.kamal/secrets
 
 # Ignore all logfiles and tempfiles.
 /log/*

@@ -1,0 +1,27 @@
+- content_for :title, "Invoices"
+
+.card
+  h1.h-page Invoices
+  p.muted.mb-6 Every successful Stripe charge against your subscription appears here. PDF downloads are generated on the fly.
+
+  - if @charges.any?
+    table.w-full.text-sm
+      thead
+        tr.border-b.border-border
+          th.text-left.py-2 Issued
+          th.text-left.py-2 Plan
+          th.text-left.py-2 Amount
+          th.text-left.py-2 Status
+          th.text-right.py-2
+      tbody
+        - @charges.each do |charge|
+          tr.border-b.border-border
+            td.py-3 = charge.created_at.to_date
+            td.py-3 = (charge.subscription&.processor_plan || "—")
+            td.py-3 = "$#{format('%.2f', charge.amount / 100.0)} #{charge.currency.to_s.upcase}"
+            td.py-3 = (charge.amount_refunded.to_i.positive? ? "Refunded" : "Paid")
+            td.py-3.text-right
+              = link_to "Download PDF", account_invoice_path(charge), class: "btn-link"
+  - else
+    p.muted No invoices yet. After a successful subscription payment, invoices land here automatically.
+    = link_to "Subscribe", new_account_subscription_path, class: "btn-primary mt-4"

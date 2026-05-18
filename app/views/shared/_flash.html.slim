@@ -1,0 +1,4 @@
+- flash.each do |key, message|
+  - next if message.blank?
+  - css = key.to_s == "notice" ? "flash-notice" : "flash-alert"
+  p class=css role=(key.to_s == "notice" ? "status" : "alert") = message

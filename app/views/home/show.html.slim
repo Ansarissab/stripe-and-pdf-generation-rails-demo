@@ -1,0 +1,24 @@
+- content_for :title, "Dashboard"
+
+.card.relative
+  .absolute.top-4.right-4.flex.gap-2
+    .group.relative
+      = link_to account_invoices_path, class: "btn-icon", "aria-label": "View invoices" do
+        svg.w-5.h-5 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"
+          path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"
+      span.tooltip View invoices
+
+  h1.h-page Welcome
+  p.muted.mb-4 Signed in as #{current_user.email}.
+
+  h2.h-section Current plan
+  p.mb-6 = plan_badge(current_user)
+
+  - if current_user.plan.nil?
+    .rounded-md.border.border-border.bg-surface-muted.p-4.mb-6
+      p.mb-3
+        | You don't have an active subscription yet.
+        |  Pick a plan to unlock invoicing and PDF downloads.
+      = link_to "Choose a plan", new_account_subscription_path, class: "btn-primary"
+  - else
+    = link_to "Manage subscription", account_subscription_path, class: "btn-primary"

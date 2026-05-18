@@ -23,9 +23,15 @@ html
     = javascript_importmap_tags
 
   body.bg-surface-muted.text-text.min-h-screen
+    - if user_signed_in?
+      header.bg-surface.border-b.border-[--color-border]
+        .mx-auto.max-w-4xl.px-5.py-3.flex.items-center.justify-between
+          = link_to "Dashboard", root_path, class: "btn-link font-semibold"
+          nav.flex.items-center.gap-4
+            = link_to "Subscription", account_subscription_path, class: "btn-link"
+            = link_to "Invoices",     account_invoices_path,    class: "btn-link"
+            = button_to "Sign out", destroy_user_session_path, method: :delete, class: "btn-link", form: { data: { turbo: false } }
+
     main.page
-      - if notice
-        p.flash-notice = notice
-      - if alert
-        p.flash-alert = alert
+      = render "shared/flash"
       = yield

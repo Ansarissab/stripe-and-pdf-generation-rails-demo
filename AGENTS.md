@@ -126,9 +126,15 @@ If you can't name 3+ cases that need an abstraction, inline it.
 **Compute at write time, not read time.**
 Store derived values on save. Don't compute in views or serializers.
 
-**DB constraints over AR validations.**
-Use `add_index ..., unique: true` and foreign keys in migrations.
-Only add AR validations when you need a user-facing form error.
+**Validation cascade — push integrity as far down the stack as it will go.**
+Each layer is the last line of defense; never skip a level just because the one above it already covers the case. In order:
+
+1. **Database.** Indexes, `unique: true`, `null: false`, foreign keys, `check` constraints. These are the only guarantees that survive concurrent writes, bypassed callbacks, raw SQL, and rake tasks. Add them in migrations on the same commit as the column they protect.
+2. **Model.** AR validations (`validates :email, presence:, uniqueness:`), `belongs_to` required-by-default, `enum`, `before_validation` normalisation. These give Rails form errors and stop bad records before SQL is even attempted, but they do not bind on concurrent writes — the DB constraint above is what catches the race.
+3. **Controller.** Strong parameters (`params.require(:user).permit(...)`), Pundit `authorize`, `before_action` guards, rate limits. These shape what the user is allowed to send in the first place.
+4. **View.** HTML form attributes (`required`, `type="email"`, `pattern=`, `maxlength=`), Stimulus / Turbo client-side checks. UX polish only — never the only enforcement; the layers below must still pass.
+
+A validation that lives at exactly one layer is a bug waiting to happen. Email uniqueness, for example, needs a unique DB index *and* a model `validates :email, uniqueness: true` (so the user gets a form error, not a 500 from the unique constraint violation).
 
 **Positive names.**
 `active` not `not_deleted`. `visible` not `not_hidden`.

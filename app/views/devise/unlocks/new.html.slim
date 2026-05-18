@@ -1,0 +1,14 @@
+.card
+  h2.h-page Resend unlock instructions
+
+  = form_for(resource, as: resource_name, url: unlock_path(resource_name), html: { method: :post, class: "form" }) do |f|
+    = render "devise/shared/error_messages", resource: resource
+
+    .form-field
+      = f.label :email, class: "form-label"
+      = f.email_field :email, autofocus: true, autocomplete: "email", class: "form-input"
+
+    = f.submit "Resend unlock instructions", class: "btn-primary"
+
+  .mt-6.space-y-2
+    = render "devise/shared/links"

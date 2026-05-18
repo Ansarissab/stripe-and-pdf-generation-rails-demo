@@ -75,4 +75,7 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # N+1 query detector and unused eager-loading detector
+  gem "bullet", "8.1.1"
 end

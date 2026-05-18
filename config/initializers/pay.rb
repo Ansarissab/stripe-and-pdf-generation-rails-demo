@@ -1,3 +1,6 @@
+# Pay.support_email= parses with Mail::Address, which isn't autoloaded yet.
+require "mail"
+
 # Project uses STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET (Stripe dashboard
 # labels); Pay reads STRIPE_PRIVATE_KEY / STRIPE_SIGNING_SECRET. Bridged here.
 ENV["STRIPE_PRIVATE_KEY"]    ||= ENV["STRIPE_SECRET_KEY"]

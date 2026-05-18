@@ -4,4 +4,7 @@ class ApplicationController < ActionController::Base
 
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
+
+  # Every controller is authenticated by default; opt out per controller if needed.
+  before_action :authenticate_user!
 end

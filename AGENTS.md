@@ -118,6 +118,25 @@ turbo_stream.update [@subscription, :status], partial: "subscriptions/status", l
 Use `data-*-target` attributes. Never query CSS selectors from controllers.
 Keep controllers small. DOM manipulation only — no business logic.
 
+### Styling — consolidated Tailwind
+
+Tailwind v4 is the styling layer. All custom design tokens and reusable component classes live in **one file**: `app/assets/tailwind/application.css`. Views consume those classes; they do not invent their own.
+
+Structure of `tailwind/application.css`:
+
+1. `@import "tailwindcss"` at the top.
+2. `@theme { … }` block for **design tokens** — brand colour, notice/alert pair, surface, border, text, and any muted variants. New colours are added here, not in `bg-[#hex]` literals inside views.
+3. `@layer components { … }` block for **shared component classes** — page chrome (`.page`, `.h-page`, `.card`), form primitives (`.form`, `.form-field`, `.form-label`, `.form-input`, `.form-hint`, `.form-errors`), buttons (`.btn-primary`, `.btn-secondary`, `.btn-danger`, `.btn-link`), and flash (`.flash-notice`, `.flash-alert`).
+
+Rules:
+
+- **Reach for a shared class first.** Use raw Tailwind utilities in a view only when nothing in `application.css` fits — and when that happens twice for the same pattern, promote it to a class in `application.css`.
+- **No utility soup in views.** Long `class="px-4 py-2 rounded-md bg-indigo-600 …"` strings in templates are a sign the class belongs in `@layer components`.
+- **Tokens, not hex codes.** When a new colour is needed, add it to `@theme` and reference it via `[--color-name]`. Never paste a hex literal into a view or into another component class.
+- **Component classes compose with `@apply`.** `.btn-primary { @apply btn bg-[--color-brand] … }` is the pattern. Stay declarative — no nested selectors, no `:hover` rules outside `@apply`.
+
+The goal is one place to retune the look-and-feel and one place to audit when the design changes.
+
 ## Coding Philosophy (37signals style)
 
 **Abstractions must earn their keep.**

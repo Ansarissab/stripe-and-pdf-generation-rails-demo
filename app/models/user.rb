@@ -4,5 +4,5 @@ class User < ApplicationRecord
 
   pay_customer
 
-  enum :plan, { free: 0, basic: 1, pro: 2 }, default: :free
+  enum :plan, { basic: 0, pro: 1 }
 end

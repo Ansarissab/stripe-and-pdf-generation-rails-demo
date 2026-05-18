@@ -89,14 +89,14 @@ Two paths are supported and both run the same DB-migrate contract.
 
 **Buildpack PaaS** — Heroku, Render, Fly Procfile mode, etc. The `Procfile` declares:
 
-```
+```procfile
 web:     bundle exec puma -C config/puma.rb
 release: bin/rails db:migrate
 ```
 
 ## Project layout (highlights)
 
-```
+```text
 app/
   controllers/   thin, before_action :authenticate_user!, authorize via Pundit
   models/        fat — business logic + concerns, no service objects
@@ -115,5 +115,5 @@ The non-obvious rules live in [AGENTS.md](AGENTS.md). The big ones:
 
 - **Validation cascade**: DB → Model → Controller → View. Every layer is the last line of defense.
 - **Tailwind**: shared classes live in one file, views reach for them before raw utilities.
-- **Pay is the source of truth for subscription state**; `users.plan` is a cached column for fast queries.
+- **Pay is the source of truth for subscription state**; `users.plan` is a cached column (Basic / Pro, nullable — a `nil` plan means the user hasn't subscribed yet).
 - **No service objects, no background jobs, no admin UI**. This is a demo. New features get pushed back if they expand scope.

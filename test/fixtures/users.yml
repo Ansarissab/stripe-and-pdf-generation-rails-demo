@@ -1,16 +1,16 @@
 # Devise-compatible fixture: encrypted_password is bcrypt("password").
 # Regenerate with: User.new.send(:password_digest, "password")
-free_user:
-  email: free@example.test
+unsubscribed_user:
+  email: nobody@example.test
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
-  plan: 0
+  plan: <%= nil %>
 
 basic_user:
   email: basic@example.test
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
-  plan: 1
+  plan: 0
 
 pro_user:
   email: pro@example.test
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
-  plan: 2
+  plan: 1

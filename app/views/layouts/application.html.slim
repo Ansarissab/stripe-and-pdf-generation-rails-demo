@@ -24,4 +24,8 @@ html
 
   body
     main.container.mx-auto.mt-28.px-5.flex
+      - if notice
+        p.notice = notice
+      - if alert
+        p.alert = alert
       = yield

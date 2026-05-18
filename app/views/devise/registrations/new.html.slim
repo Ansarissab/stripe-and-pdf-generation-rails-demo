@@ -6,19 +6,19 @@
 
     .form-field
       = f.label :email, class: "form-label"
-      = f.email_field :email, autofocus: true, autocomplete: "email", class: "form-input"
+      = f.email_field :email, autofocus: true, autocomplete: "email", required: true, class: "form-input"
 
     .form-field
       = f.label :password, class: "form-label"
-      = f.password_field :password, autocomplete: "new-password", class: "form-input"
+      = f.password_field :password, autocomplete: "new-password", required: true, minlength: (@minimum_password_length || 6), class: "form-input"
       - if @minimum_password_length
         p.form-hint = "#{@minimum_password_length} characters minimum"
 
     .form-field
       = f.label :password_confirmation, class: "form-label"
-      = f.password_field :password_confirmation, autocomplete: "new-password", class: "form-input"
+      = f.password_field :password_confirmation, autocomplete: "new-password", required: true, class: "form-input"
 
-    = f.submit "Sign up", class: "btn-primary"
+    button.btn-primary type="submit" Sign up
 
   .mt-6.space-y-2
     = render "devise/shared/links"

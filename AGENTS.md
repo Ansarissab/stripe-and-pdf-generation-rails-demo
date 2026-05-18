@@ -43,10 +43,17 @@ No system tests for this demo. Unit and controller tests only.
 
 ## Security Scan
 
-```
+```sh
 bundle exec brakeman --no-pager
 bundle exec rubocop
+bundle exec bundler-audit check --update
+bin/importmap audit
+bin/ci   # runs all four in one shot
 ```
+
+## Pre-commit hook
+
+`bin/setup` runs `git config core.hooksPath .githooks` so `.githooks/pre-commit` is active for every developer. The hook runs the same four checks GitHub Actions runs — rubocop, brakeman, bundler-audit, importmap audit — and aborts the commit on any failure. `git commit --no-verify` is the documented escape hatch and must be justified.
 
 ## Deploy
 

@@ -77,9 +77,21 @@ bin/rails test test/models/user_test.rb # one file
 bin/rubocop              # Rails Omakase style
 bin/brakeman --no-pager  # security scan
 bundle exec bundler-audit check --update
+bin/importmap audit      # JS dependency scan
+bin/ci                   # run everything above in one shot
 ```
 
 Bullet is enabled in development and writes N+1 warnings to `log/bullet.log` and the Rails log.
+
+### Pre-commit hook
+
+`bin/setup` wires up `.githooks/pre-commit`, which runs the same four checks GitHub Actions runs (rubocop, brakeman, bundler-audit, importmap audit). A failing check aborts the commit. Bypass in a true emergency with `git commit --no-verify`.
+
+If you cloned the repo without running `bin/setup`, install the hook with:
+
+```sh
+git config core.hooksPath .githooks
+```
 
 ## Deployment
 

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+#
+# Pre-commit hook -- runs the same checks GitHub Actions runs on every PR:
+#
+#   lint      bin/rubocop
+#   scan_ruby bin/brakeman + bin/bundler-audit
+#   scan_js   bin/importmap audit
+#
+# Wired up by bin/setup via `git config core.hooksPath .githooks`.
+# Skip in an emergency with: git commit --no-verify
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+red()   { printf '\033[31m%s\033[0m\n' "$*"; }
+green() { printf '\033[32m%s\033[0m\n' "$*"; }
+blue()  { printf '\033[34m%s\033[0m\n' "$*"; }
+
+step() {
+  local label=$1; shift
+  blue "▸ $label"
+  if ! "$@"; then
+    red "✗ $label failed -- commit aborted. Fix the issues and try again."
+    red "  (Bypass in an emergency with: git commit --no-verify)"
+    exit 1
+  fi
+}
+
+step "Lint (rubocop)"                bin/rubocop --force-exclusion
+step "Scan Ruby (brakeman)"          bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error
+step "Scan Ruby gems (bundler-audit)" bin/bundler-audit check --update
+step "Scan JS (importmap audit)"     bin/importmap audit
+
+green "✓ All checks passed."

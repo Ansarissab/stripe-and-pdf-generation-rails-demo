@@ -22,10 +22,10 @@ html
     = stylesheet_link_tag :app, "data-turbo-track": "reload"
     = javascript_importmap_tags
 
-  body
-    main.container.mx-auto.mt-28.px-5.flex
+  body.bg-surface-muted.text-text.min-h-screen
+    main.page
       - if notice
-        p.notice = notice
+        p.flash-notice = notice
       - if alert
-        p.alert = alert
+        p.flash-alert = alert
       = yield

@@ -1,24 +1,24 @@
-h2 Sign up
+.card
+  h2.h-page Sign up
 
-= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f|
-  = render "devise/shared/error_messages", resource: resource
+  = form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "form" }) do |f|
+    = render "devise/shared/error_messages", resource: resource
 
-  .field
-    p = f.label :email
-    p = f.email_field :email, autofocus: true, autocomplete: "email"
+    .form-field
+      = f.label :email, class: "form-label"
+      = f.email_field :email, autofocus: true, autocomplete: "email", class: "form-input"
 
-  .field
-    p = f.label :password
-    - if @minimum_password_length
-      p
-        em = "(#{@minimum_password_length} characters minimum)"
-    p = f.password_field :password, autocomplete: "new-password"
+    .form-field
+      = f.label :password, class: "form-label"
+      = f.password_field :password, autocomplete: "new-password", class: "form-input"
+      - if @minimum_password_length
+        p.form-hint = "#{@minimum_password_length} characters minimum"
 
-  .field
-    p = f.label :password_confirmation
-    p = f.password_field :password_confirmation, autocomplete: "new-password"
+    .form-field
+      = f.label :password_confirmation, class: "form-label"
+      = f.password_field :password_confirmation, autocomplete: "new-password", class: "form-input"
 
-  .actions
-    = f.submit "Sign up"
+    = f.submit "Sign up", class: "btn-primary"
 
-= render "devise/shared/links"
+  .mt-6.space-y-2
+    = render "devise/shared/links"

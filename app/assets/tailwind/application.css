@@ -1,1 +1,57 @@
 @import "tailwindcss";
+
+/*
+ * Design tokens. All custom colors, spacing, and fonts live here so the
+ * palette stays consistent across the app and is changeable in one place.
+ */
+@theme {
+  --color-brand:        #635bff;
+  --color-brand-dark:   #4f46e5;
+  --color-notice:       #16a34a;
+  --color-notice-soft:  #dcfce7;
+  --color-alert:        #dc2626;
+  --color-alert-soft:   #fee2e2;
+  --color-surface:      #ffffff;
+  --color-surface-muted:#f9fafb;
+  --color-border:       #e5e7eb;
+  --color-text:         #111827;
+  --color-text-muted:   #6b7280;
+}
+
+/*
+ * Shared component classes. Every reusable visual primitive is defined
+ * here so views can stay free of Tailwind utility soup. Add a class here
+ * before sprinkling utilities in templates.
+ */
+@layer components {
+  /* Page chrome */
+  .page          { @apply mx-auto max-w-4xl px-5 py-12; }
+  .h-page        { @apply text-3xl font-bold text-[--color-text] mb-6; }
+  .h-section     { @apply text-xl font-semibold text-[--color-text] mb-4; }
+  .card          { @apply bg-[--color-surface] border border-[--color-border] rounded-lg shadow-sm p-6; }
+  .muted         { @apply text-[--color-text-muted]; }
+
+  /* Forms */
+  .form          { @apply space-y-4; }
+  .form-field    { @apply flex flex-col; }
+  .form-label    { @apply text-sm font-medium text-[--color-text] mb-1; }
+  .form-input    { @apply w-full px-3 py-2 bg-white border border-[--color-border] rounded-md
+                          focus:outline-none focus:ring-2 focus:ring-[--color-brand] focus:border-[--color-brand]; }
+  .form-hint     { @apply text-sm text-[--color-text-muted] mt-1; }
+  .form-errors   { @apply rounded-md border border-[--color-alert] bg-[--color-alert-soft] p-3 text-sm text-[--color-alert]; }
+
+  /* Buttons */
+  .btn           { @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium
+                          transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2; }
+  .btn-primary   { @apply btn bg-[--color-brand] text-white hover:bg-[--color-brand-dark]
+                          focus:ring-[--color-brand]; }
+  .btn-secondary { @apply btn bg-white text-[--color-text] border border-[--color-border]
+                          hover:bg-[--color-surface-muted] focus:ring-[--color-border]; }
+  .btn-danger    { @apply btn bg-[--color-alert] text-white hover:bg-red-700 focus:ring-[--color-alert]; }
+  .btn-link      { @apply text-[--color-brand] hover:underline; }
+
+  /* Flash */
+  .flash         { @apply mb-4 px-4 py-3 rounded-md border text-sm; }
+  .flash-notice  { @apply flash bg-[--color-notice-soft] border-[--color-notice] text-[--color-notice]; }
+  .flash-alert   { @apply flash bg-[--color-alert-soft]  border-[--color-alert]  text-[--color-alert]; }
+}

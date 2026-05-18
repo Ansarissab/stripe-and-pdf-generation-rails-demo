@@ -1,44 +1,43 @@
-h2
-  = "Edit #{resource_name.to_s.humanize}"
+.card
+  h2.h-page
+    = "Edit #{resource_name.to_s.humanize}"
 
-= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f|
-  = render "devise/shared/error_messages", resource: resource
+  = form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "form" }) do |f|
+    = render "devise/shared/error_messages", resource: resource
 
-  .field
-    p = f.label :email
-    p = f.email_field :email, autofocus: true, autocomplete: "email"
+    .form-field
+      = f.label :email, class: "form-label"
+      = f.email_field :email, autofocus: true, autocomplete: "email", class: "form-input"
 
-  - if devise_mapping.confirmable? && resource.pending_reconfirmation?
-    div
-      | Currently waiting confirmation for:
-      = resource.unconfirmed_email
+    - if devise_mapping.confirmable? && resource.pending_reconfirmation?
+      p.form-hint
+        | Currently waiting confirmation for:
+        = resource.unconfirmed_email
 
-  .field
-    p
-      = f.label :password
-      i  (leave blank if you don't want to change it)
-    p = f.password_field :password, autocomplete: "new-password"
-    - if @minimum_password_length
-      p
-        em = "#{@minimum_password_length} characters minimum"
+    .form-field
+      = f.label :password, class: "form-label"
+      = f.password_field :password, autocomplete: "new-password", class: "form-input"
+      p.form-hint
+        | Leave blank if you don't want to change it.
+        - if @minimum_password_length
+          |  #{@minimum_password_length} characters minimum.
 
-  .field
-    p = f.label :password_confirmation
-    p = f.password_field :password_confirmation, autocomplete: "new-password"
+    .form-field
+      = f.label :password_confirmation, class: "form-label"
+      = f.password_field :password_confirmation, autocomplete: "new-password", class: "form-input"
 
-  .field
-    p
-      = f.label :current_password
-      i  (we need your current password to confirm your changes)
-    p = f.password_field :current_password, autocomplete: "current-password"
+    .form-field
+      = f.label :current_password, class: "form-label"
+      = f.password_field :current_password, autocomplete: "current-password", class: "form-input"
+      p.form-hint We need your current password to confirm your changes.
 
-  .actions
-    = f.submit "Update"
+    = f.submit "Update", class: "btn-primary"
 
-h3 Cancel my account
+.card.mt-6
+  h3.h-section Cancel my account
 
-div
-  | Unhappy?
-  = button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?", turbo_confirm: "Are you sure?" }, method: :delete
+  p.muted.mb-4 Unhappy? You can cancel your account below. This cannot be undone.
 
-= link_to "Back", :back
+  = button_to "Cancel my account", registration_path(resource_name), method: :delete, class: "btn-danger", data: { confirm: "Are you sure?", turbo_confirm: "Are you sure?" }
+
+= link_to "Back", :back, class: "btn-link inline-block mt-6"

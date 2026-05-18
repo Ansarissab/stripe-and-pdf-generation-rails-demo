@@ -79,19 +79,71 @@ from ApplicationController. No unauthenticated routes exist.
 Pundit handles authorization. Policies live in `app/policies/`.
 Call `authorize` in every controller action. No skipping.
 
+**Policy hierarchy** (DRY OOP base):
+
+```text
+ApplicationPolicy         # Pundit default — every action returns false (deny-by-default)
+  └── AuthenticatedPolicy # every action returns signed_in? — base for app-owned resources
+        ├── HomePolicy
+        └── Pay::SubscriptionPolicy
+              └── (overrides destroy? -> owned?)
+        └── Pay::ChargePolicy
+              └── (overrides show? -> owned? when record is an instance)
+```
+
+`ApplicationPolicy` exposes two protected predicates that every subclass can call:
+
+- `signed_in?` — `user.present?`
+- `owned?` — walks `record.customer.owner` (Pay records) or `record.user` (bare AR), returns `true` only when the resolved owner equals `user`. Returns `false` for class-shaped records (e.g. `authorize Pay::Subscription, :create?`) so subclasses can mix class-mode and instance-mode safely.
+
+When the actual instance is an STI subclass Pundit can't resolve (e.g. `Pay::Stripe::Subscription` → `Pay::Stripe::SubscriptionPolicy` doesn't exist), pass the base class explicitly:
+
+```ruby
+authorize @subscription,            policy_class: Pay::SubscriptionPolicy
+authorize Pay::Subscription, :new?, policy_class: Pay::SubscriptionPolicy
+```
+
+Rule of thumb for new policies: subclass `AuthenticatedPolicy`, override only the actions that need ownership (or any deny-by-default), and lean on `owned?` rather than rewriting the customer→owner walk in each policy.
+
 ### Subscriptions
 
 Pay gem wraps Stripe. Two plans: Basic and Pro.
-Plan logic lives on the `User` model and `SubscriptionsController`.
 Billing portal handled via Pay's built-in routes.
 
-Users have a `pay_customer` — delegate to it, don't reinvent.
+**Stripe-touching logic lives in a `Billing` concern on `Pay::Customer`**, mixed in via `config/initializers/pay_customer_billing.rb`. The concern exposes:
+
+- `start_hosted_checkout(price_id:, success_url:, cancel_url:)` — Stripe-hosted Checkout
+- `start_embedded_subscription(price_id:)` — `default_incomplete` sub + `client_secret` extraction (handles API version drift: Basil `confirmation_secret` → older `payment_intent` → multi-payment `payments.data[0]` fallback chain)
+- `open_billing_portal(return_url:)` — billing portal session
+- `current_subscription` / `active_subscription` — query helpers preferring an active sub over orphans
+
+Why a concern on `Pay::Customer` instead of a service object: AGENTS.md bans service objects; behaviour belongs on the model. Pay is extended in initializer because the class lives in the gem. **Include in both `Pay::Customer` AND `Pay::Stripe::Customer`** — STI autoload order in Pay can otherwise leave the subclass without the method at first call.
+
+Controllers stay slim: `current_user.payment_processor.start_hosted_checkout(...)` and handle the redirect/flash. No Stripe SDK imports in controllers.
+
+`Account::SubscriptionsController` (see [app/controllers/account/subscriptions_controller.rb](app/controllers/account/subscriptions_controller.rb)) is the pattern — auth, authorize, dispatch to `billing`, render/redirect with friendly flashes. The two redirect helpers (`missing_plan_redirect`, `stripe_failure_redirect`) collapse the duplicate error paths.
 
 ### PDF Generation
 
-HexaPDF generates PDFs on the fly. No stored files for this demo.
-PDF logic lives in `app/pdfs/` as plain Ruby classes.
-Controllers stream the result directly with `send_data`.
+HexaPDF generates PDFs on the fly. No stored files for this demo. Controllers stream the result directly with `send_data`.
+
+**Class hierarchy** (`app/pdfs/`):
+
+```text
+Pdf                       # base — Canvas plumbing + drawing primitives
+ └── InvoicePdf           # layout only — calls primitives, never touches Canvas
+ └── <future docs here>
+```
+
+The base class exposes three tiers of primitives so subclasses stay declarative:
+
+| Tier | Methods | Use when |
+| --- | --- | --- |
+| Low-level | `text`, `rule`, `money` | Custom one-off layout |
+| Mid-level | `heading`, `meta_lines`, `two_columns`, `table`, `total_row`, `footer_lines` | Standard business-document blocks |
+| Structural | `render`, `filename`, `draw` | Subclass only overrides `draw` (required) and `filename` (defaults to `class_name.pdf`) |
+
+New PDF type: subclass `Pdf`, implement `#draw` calling the helpers above, override `#filename`. No HexaPDF or StringIO knowledge required at the subclass level.
 
 Do not use background jobs for PDF generation in this demo — it is synchronous and instant.
 
@@ -106,7 +158,7 @@ If a concern is used by only one model, inline it into the model.
 Thin DRY controllers, use concerns, services and OOP. No logic beyond: authenticate, authorize, find record, respond.
 Use standard CRUD actions. If you need a non-CRUD action, make it a new resource.
 
-`My::` namespace for anything scoped to `Current.user` (e.g., `My::SubscriptionsController`).
+`Account::` namespace for anything scoped to `Current.user` (e.g., `Account::SubscriptionsController`).
 
 ### Views
 

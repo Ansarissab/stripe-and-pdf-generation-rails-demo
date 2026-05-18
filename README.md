@@ -31,18 +31,21 @@ Everything sits behind Devise authentication. There are no public pages. The app
 ## Setup
 
 ```sh
-bin/setup            # bundle install + db:create + db:migrate
+bin/setup            # bundle install + db:create + db:migrate + git hooks
 cp .env.example .env # fill in your Stripe test keys + plan price IDs
-bin/dev              # boots Puma + Tailwind watcher via Procfile.dev
+bin/rails db:seed    # optional: 3 confirmed test users + demo billing rows
+bin/dev              # boots Puma on :3200 + Tailwind watcher via Procfile.dev
 ```
 
-The app is then at <http://localhost:3000>. Webhooks during local development:
+The app is then at <http://localhost:3200> (the dev port default — see `bin/dev`). Webhooks during local development:
 
 ```sh
-stripe listen --forward-to localhost:3000/pay/webhooks/stripe
+stripe listen --forward-to localhost:3200/pay/webhooks/stripe
 ```
 
-Take the `whsec_...` value the CLI prints and put it in `.env` as `STRIPE_WEBHOOK_SECRET`.
+Take the `whsec_...` value the CLI prints and put it in `.env` as `STRIPE_SIGNING_SECRET`. The full integration runbook (every Stripe-related error we've hit and how we fixed it, plus production checklist) lives in [docs/stripe_integration/README.md](docs/stripe_integration/README.md).
+
+Dev confirmation emails go to **letter_opener_web** — visit <http://localhost:3200/letter_opener> to read them.
 
 ## Environment variables
 
@@ -110,15 +113,38 @@ release: bin/rails db:migrate
 
 ```text
 app/
-  controllers/   thin, before_action :authenticate_user!, authorize via Pundit
-  models/        fat — business logic + concerns, no service objects
-  pdfs/          plain Ruby classes that emit HexaPDF documents
-  policies/      Pundit policies (one per resource)
-  views/         Slim only
-  assets/tailwind/application.css   single source of truth for design tokens + component classes
+  controllers/
+    account/                       Anything scoped to current_user (subscription, invoices)
+    home_controller.rb             Signed-in landing page
+  models/                          Fat — business logic + concerns, no service objects
+    concerns/plan_sync.rb          Mirrors Pay::Subscription state -> users.plan cache column
+  pdfs/                            Plain Ruby classes that emit HexaPDF documents
+  policies/
+    pay/                           Pundit policies for Pay::Subscription, Pay::Charge
+  javascript/controllers/
+    stripe_elements_controller.js  Mounts Stripe Elements PaymentElement for the embedded flow
+  views/                           Slim only
+  assets/tailwind/application.css  Single source of truth for design tokens + component classes
 config/initializers/
-  devise.rb      Devise config
-  pay.rb         Pay.setup + Stripe env-var bridge
+  devise.rb                        Devise config
+  pay.rb                           Pay.setup (auto-mounts /pay/webhooks/stripe)
+  pay_subscription_sync.rb         Hooks PlanSync into Pay::Subscription
+lib/tasks/
+  subscriptions.rake               flush_orphans + resync_from_stripe maintenance tasks
+docs/stripe_integration/           Full Stripe + Pay runbook (setup, errors, fixes, prod checklist)
+```
+
+The two account-scoped routes:
+
+```text
+GET    /account/subscription              show current sub (or "Choose a plan")
+GET    /account/subscription/new          plan picker, two flows side-by-side
+POST   /account/subscription              hosted Stripe Checkout
+POST   /account/subscription/embedded     embedded Stripe Elements (PaymentElement)
+DELETE /account/subscription              cancel at period end
+POST   /account/subscription/billing_portal   redirect to Stripe-hosted portal
+GET    /account/invoices                  list of Pay::Charge rows
+GET    /account/invoices/:id              streams an InvoicePdf via send_data
 ```
 
 ## Conventions
@@ -129,3 +155,13 @@ The non-obvious rules live in [AGENTS.md](AGENTS.md). The big ones:
 - **Tailwind**: shared classes live in one file, views reach for them before raw utilities.
 - **Pay is the source of truth for subscription state**; `users.plan` is a cached column (Basic / Pro, nullable — a `nil` plan means the user hasn't subscribed yet).
 - **No service objects, no background jobs, no admin UI**. This is a demo. New features get pushed back if they expand scope.
+- **`Account::` namespace** for everything scoped to `current_user` (the user's own subscription, invoices, etc.).
+
+## Maintenance tasks
+
+```sh
+bin/rails subscriptions:flush_orphans       # cancel incomplete subs in Stripe + delete local rows, resync users.plan
+bin/rails subscriptions:resync_from_stripe  # pull every customer's subs from Stripe and upsert locally
+```
+
+Use the first when failed Checkout attempts have left orphan `incomplete` subs; use the second when the local DB has drifted from Stripe (e.g. after a fresh `db:reset`).

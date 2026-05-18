@@ -21,7 +21,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "pay_customer association is wired" do
-    assert_respond_to users(:basic_user), :pay_customer
     assert_respond_to users(:basic_user), :payment_processor
+    assert_respond_to users(:basic_user), :pay_customers
   end
 end

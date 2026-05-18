@@ -3,14 +3,17 @@
 unsubscribed_user:
   email: nobody@example.test
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
+  confirmed_at: <%= 1.day.ago %>
   plan: <%= nil %>
 
 basic_user:
   email: basic@example.test
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
+  confirmed_at: <%= 1.day.ago %>
   plan: 0
 
 pro_user:
   email: pro@example.test
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
+  confirmed_at: <%= 1.day.ago %>
   plan: 1

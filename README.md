@@ -51,12 +51,12 @@ Take the `whsec_...` value the CLI prints and put it in `.env` as `STRIPE_WEBHOO
 | Key | What it is |
 | --- | --- |
 | `STRIPE_PUBLIC_KEY` | Publishable key from Stripe dashboard |
-| `STRIPE_SECRET_KEY` | Secret key — Pay reads this internally as `STRIPE_PRIVATE_KEY` (bridged in `config/initializers/pay.rb`) |
-| `STRIPE_WEBHOOK_SECRET` | Endpoint signing secret — bridged to Pay's `STRIPE_SIGNING_SECRET` |
+| `STRIPE_PRIVATE_KEY` | Stripe "Secret key" — name follows Pay's convention |
+| `STRIPE_SIGNING_SECRET` | Webhook endpoint signing secret |
 | `PAY_STRIPE_PLAN_BASIC` | Stripe Price ID for the Basic tier |
 | `PAY_STRIPE_PLAN_PRO` | Stripe Price ID for the Pro tier |
-| `DATABASE_URL` | Postgres connection string |
 | `SECRET_KEY_BASE` | Generate with `bin/rails secret` |
+| `DATABASE_URL` | Optional — overrides `config/database.yml`. Leave unset in development to use the local Postgres socket with your OS user. |
 
 Production secrets are loaded by Kamal from `.kamal/secrets` (gitignored), not from `.env`.
 

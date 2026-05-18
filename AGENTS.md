@@ -192,12 +192,13 @@ Managed via `.env` in development. Never commit secrets. Never hardcode them.
 
 Required keys (see `.env.example`):
 
-```
+```text
 STRIPE_PUBLIC_KEY
-STRIPE_SECRET_KEY
-STRIPE_WEBHOOK_SECRET
+STRIPE_PRIVATE_KEY       # "Secret key" in the Stripe dashboard
+STRIPE_SIGNING_SECRET    # Webhook endpoint "signing secret" in the dashboard
 PAY_STRIPE_PLAN_BASIC
 PAY_STRIPE_PLAN_PRO
-DATABASE_URL
 SECRET_KEY_BASE
 ```
+
+`DATABASE_URL` is optional in development -- `config/database.yml` defaults to the local Postgres socket with the OS user. Set `DATABASE_URL` only to override (e.g. point at a remote DB).

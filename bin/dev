@@ -5,8 +5,9 @@ if ! gem list foreman -i --silent; then
   gem install foreman
 fi
 
-# Default to port 3000 if not specified
-export PORT="${PORT:-3000}"
+# Default to port 3200 to match the `stripe listen --forward-to localhost:3200/...`
+# session documented in the README. Override with PORT=... if needed.
+export PORT="${PORT:-3200}"
 
 # Let the debug gem allow remote connections,
 # but avoid loading until `debugger` is called

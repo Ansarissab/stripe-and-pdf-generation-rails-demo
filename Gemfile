@@ -55,6 +55,10 @@ gem "stripe", "19.1.0"
 # PDF generation (pure Ruby, no binary deps)
 gem "hexapdf", "1.8.0"
 
+# Minimal admin dashboard (separate AdminUser; lives at /admin)
+gem "activeadmin", "3.5.1"
+gem "sassc-rails", require: false
+
 group :development, :test do
   # Loads local secrets from .env (.env is gitignored; .env.example is the committed template)
   gem "dotenv-rails", "3.2.0"

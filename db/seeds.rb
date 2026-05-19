@@ -1,11 +1,19 @@
 # Idempotent seed data. Run with: `bin/rails db:seed`.
 #
-# Three confirmed users + (for the two subscribed ones) a fake Pay::Customer,
+# Three confirmed end-users + (for the two subscribed ones) a fake Pay::Customer,
 # Pay::Subscription and one Pay::Charge so the dashboard, invoices list and
 # PDF download all have something to render WITHOUT going through Stripe.
 # Real flows (hosted Checkout / embedded Elements) still populate via webhooks
 # in dev; this is purely a "click around the demo with no Stripe round-trip"
 # convenience.
+#
+# Also seeds an AdminUser (only in development) for the ActiveAdmin panel at
+# /admin. Credentials:  admin@example.test / password.
+#
+# End-user demo credentials (all confirmed, password: `password`):
+#   nobody@example.test  -- signed up, no subscription
+#   basic@example.test   -- subscribed to Basic
+#   pro@example.test     -- subscribed to Pro
 
 USERS = [
   { email: "nobody@example.test", plan: nil,                 demo_billing: false },
@@ -51,3 +59,11 @@ USERS.each do |attrs|
 end
 
 puts "Seeded #{User.count} users, #{Pay::Customer.count} pay_customers, #{Pay::Subscription.count} subscriptions, #{Pay::Charge.count} charges."
+
+if Rails.env.development?
+  admin = AdminUser.find_or_create_by!(email: "admin@example.test") do |a|
+    a.password = "password"
+    a.password_confirmation = "password"
+  end
+  puts "Seeded admin: #{admin.email} / password"
+end

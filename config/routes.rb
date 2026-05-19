@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  devise_for :admin_users, ActiveAdmin::Devise.config
+  ActiveAdmin.routes(self)
   devise_for :users
 
   namespace :account do
@@ -13,6 +15,8 @@ Rails.application.routes.draw do
 
     resources :invoices, only: %i[index show]
   end
+
+  resource :locale, only: :update
 
   if Rails.env.development?
     mount LetterOpenerWeb::Engine, at: "/letter_opener"

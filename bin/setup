@@ -27,6 +27,12 @@ FileUtils.chdir APP_ROOT do
   system! "bin/rails db:prepare"
   system! "bin/rails db:reset" if ARGV.include?("--reset")
 
+  puts "\n== Compiling ActiveAdmin CSS =="
+  # Propshaft cannot process SCSS. AA's stylesheet_link_tag expects a flat
+  # active_admin.css; we compile the gem's SCSS sources once into
+  # app/assets/builds/active_admin.css for Propshaft to serve.
+  system! "bin/rails active_admin:build_css"
+
   puts "\n== Removing old logs and tempfiles =="
   system! "bin/rails log:clear tmp:clear"
 

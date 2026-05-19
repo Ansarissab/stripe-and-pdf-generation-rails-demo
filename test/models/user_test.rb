@@ -24,4 +24,17 @@ class UserTest < ActiveSupport::TestCase
     assert_respond_to users(:basic_user), :payment_processor
     assert_respond_to users(:basic_user), :pay_customers
   end
+
+  test "ransackable_attributes excludes auth secrets and PII" do
+    attrs = User.ransackable_attributes
+    assert_includes attrs, "email"
+    assert_includes attrs, "plan"
+    %w[encrypted_password reset_password_token confirmation_token unlock_token current_sign_in_ip last_sign_in_ip unconfirmed_email].each do |sensitive|
+      assert_not_includes attrs, sensitive, "#{sensitive} must NOT be searchable in admin"
+    end
+  end
+
+  test "ransackable_associations only exposes pay_customers" do
+    assert_equal %w[pay_customers], User.ransackable_associations
+  end
 end

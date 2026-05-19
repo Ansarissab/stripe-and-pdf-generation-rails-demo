@@ -42,3 +42,6 @@
 !/app/assets/builds/.keep
 
 **/.kamal/secrets
+
+# SimpleCov output (regenerated on every test run).
+/coverage/

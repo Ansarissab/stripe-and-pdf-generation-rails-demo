@@ -72,6 +72,14 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 end
 
+group :test do
+  # Code coverage reporting
+  gem "simplecov", require: false
+
+  # Stub external HTTP (Stripe, etc.) so tests are deterministic and offline-safe
+  gem "webmock"
+end
+
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"

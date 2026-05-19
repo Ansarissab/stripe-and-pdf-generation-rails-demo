@@ -3,12 +3,8 @@ require "test_helper"
 class InvoicePdfTest < ActiveSupport::TestCase
   setup do
     @user     = users(:basic_user)
-    @customer = @user.set_payment_processor(:stripe, processor_id: "cus_test_pdf")
-    @charge = Pay::Charge.create!(
-      customer: @customer,
-      processor_id: "ch_pdf_test",
-      amount: 1234, currency: "usd"
-    )
+    @customer = setup_billing(@user)
+    @charge   = make_charge(@customer, amount: 1234)
   end
 
   test "renders a valid PDF binary" do

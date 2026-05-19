@@ -4,14 +4,9 @@ class Account::InvoicesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user      = users(:basic_user)
     @other     = users(:pro_user)
-    @customer  = @user.set_payment_processor(:stripe, processor_id: "cus_test_owner")
-    @other_cus = @other.set_payment_processor(:stripe, processor_id: "cus_test_other")
-
-    @charge = Pay::Charge.create!(
-      customer: @customer,
-      processor_id: "ch_test_1",
-      amount: 900, currency: "usd"
-    )
+    @customer  = setup_billing(@user)
+    @other_cus = setup_billing(@other)
+    @charge    = make_charge(@customer)
   end
 
   test "redirects when unauthenticated" do
@@ -20,7 +15,7 @@ class Account::InvoicesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "lists only the current user's charges" do
-    Pay::Charge.create!(customer: @other_cus, processor_id: "ch_other", amount: 2900, currency: "usd")
+    make_charge(@other_cus, amount: 2900)
 
     sign_in @user
     get account_invoices_url
@@ -38,7 +33,7 @@ class Account::InvoicesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "redirects with a friendly message when accessing another user's invoice" do
-    other_charge = Pay::Charge.create!(customer: @other_cus, processor_id: "ch_other", amount: 2900, currency: "usd")
+    other_charge = make_charge(@other_cus, amount: 2900)
 
     sign_in @user
     get account_invoice_url(other_charge)

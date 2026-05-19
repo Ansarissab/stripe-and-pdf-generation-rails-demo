@@ -3,33 +3,31 @@ require "test_helper"
 class PlanSyncTest < ActiveSupport::TestCase
   setup do
     @user     = users(:unsubscribed_user)
-    @customer = @user.set_payment_processor(:stripe, processor_id: "cus_test_plan_sync")
-    ENV["PAY_STRIPE_PLAN_BASIC"] = "price_basic_test"
-    ENV["PAY_STRIPE_PLAN_PRO"]   = "price_pro_test"
+    @customer = setup_billing(@user)
   end
 
   test "active basic subscription sets users.plan to basic" do
-    Pay::Subscription.create!(
+    Pay::Stripe::Subscription.create!(
       customer: @customer, name: "default",
-      processor_id: "sub_1", processor_plan: "price_basic_test",
+      processor_id: "sub_1", processor_plan: ENV["PAY_STRIPE_PLAN_BASIC"],
       status: "active"
     )
     assert_equal "basic", @user.reload.plan
   end
 
   test "active pro subscription sets users.plan to pro" do
-    Pay::Subscription.create!(
+    Pay::Stripe::Subscription.create!(
       customer: @customer, name: "default",
-      processor_id: "sub_2", processor_plan: "price_pro_test",
+      processor_id: "sub_2", processor_plan: ENV["PAY_STRIPE_PLAN_PRO"],
       status: "active"
     )
     assert_equal "pro", @user.reload.plan
   end
 
   test "canceled subscription clears users.plan" do
-    sub = Pay::Subscription.create!(
+    sub = Pay::Stripe::Subscription.create!(
       customer: @customer, name: "default",
-      processor_id: "sub_3", processor_plan: "price_basic_test",
+      processor_id: "sub_3", processor_plan: ENV["PAY_STRIPE_PLAN_BASIC"],
       status: "active"
     )
     assert_equal "basic", @user.reload.plan
@@ -39,7 +37,7 @@ class PlanSyncTest < ActiveSupport::TestCase
   end
 
   test "unknown processor_plan leaves users.plan nil" do
-    Pay::Subscription.create!(
+    Pay::Stripe::Subscription.create!(
       customer: @customer, name: "default",
       processor_id: "sub_4", processor_plan: "price_unknown",
       status: "active"

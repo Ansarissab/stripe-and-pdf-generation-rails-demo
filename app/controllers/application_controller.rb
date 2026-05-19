@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   include Pundit::Authorization
+  include LocaleSwitching
 
   allow_browser versions: :modern
   stale_when_importmap_changes
@@ -11,7 +12,7 @@ class ApplicationController < ActionController::Base
   private
 
   def user_not_authorized
-    flash[:alert] = "You are not authorized to perform this action."
+    flash[:alert] = I18n.t("flash.not_authorized")
     redirect_back fallback_location: root_path
   end
 end

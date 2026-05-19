@@ -1,35 +1,35 @@
-- content_for :title, "Subscription"
+- content_for :title, t(".title")
 
 .card
-  h1.h-page Subscription
-  p.muted.mb-4 Manage your plan, switch tiers, or cancel.
+  h1.h-page = t(".title")
+  p.muted.mb-4 = t(".intro")
 
-  h2.h-section Current state
+  h2.h-section = t(".current_state")
   - if @subscription
     dl.grid.grid-cols-2.gap-y-2.text-sm.mb-6
-      dt.muted Plan
+      dt.muted = t(".plan")
       dd = plan_badge(current_user)
 
-      dt.muted Status
+      dt.muted = t(".status")
       dd = @subscription.status.titleize
 
-      dt.muted Started
+      dt.muted = t(".started")
       dd = @subscription.created_at&.to_date
 
       - if @subscription.current_period_end
-        dt.muted Renews
+        dt.muted = t(".renews")
         dd = @subscription.current_period_end.to_date
 
       - if @subscription.ends_at
-        dt.muted Ends
+        dt.muted = t(".ends")
         dd = @subscription.ends_at.to_date
 
     .flex.flex-wrap.gap-3
-      = button_to "Open Stripe billing portal", billing_portal_account_subscription_path, method: :post, class: "btn-secondary", form: { data: { turbo: false } }
+      = button_to t(".portal_cta"), billing_portal_account_subscription_path, method: :post, class: "btn-secondary", form: { data: { turbo: false } }
       - if @subscription.active?
-        = button_to "Cancel subscription", account_subscription_path, method: :delete, class: "btn-danger", form: { data: { turbo_confirm: "Cancel at period end?" } }
-      = link_to "Change plan", new_account_subscription_path, class: "btn-link"
+        = button_to t(".cancel_cta"), account_subscription_path, method: :delete, class: "btn-danger", form: { data: { turbo_confirm: t(".cancel_confirm") } }
+      = link_to t(".change_plan_cta"), new_account_subscription_path, class: "btn-link"
   - else
     p.mb-4 = plan_badge(current_user)
-    p.muted.mb-4 You don't have an active subscription yet.
-    = link_to "Choose a plan", new_account_subscription_path, class: "btn-primary"
+    p.muted.mb-4 = t(".no_subscription_html")
+    = link_to t("account.subscriptions.new.title"), new_account_subscription_path, class: "btn-primary"

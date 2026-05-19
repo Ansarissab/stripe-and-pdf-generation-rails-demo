@@ -1,5 +1,5 @@
 .card
-  h2.h-page Sign up
+  h2.h-page = t(".title")
 
   = form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "form" }) do |f|
     = render "devise/shared/error_messages", resource: resource
@@ -12,13 +12,13 @@
       = f.label :password, class: "form-label"
       = f.password_field :password, autocomplete: "new-password", required: true, minlength: (@minimum_password_length || 6), class: "form-input"
       - if @minimum_password_length
-        p.form-hint = "#{@minimum_password_length} characters minimum"
+        p.form-hint = t(".min_length", minimum: @minimum_password_length)
 
     .form-field
       = f.label :password_confirmation, class: "form-label"
       = f.password_field :password_confirmation, autocomplete: "new-password", required: true, class: "form-input"
 
-    button.btn-primary type="submit" Sign up
+    button.btn-primary type="submit" = t(".submit")
 
   .mt-6.space-y-2
     = render "devise/shared/links"

@@ -1,5 +1,5 @@
 .card
-  h2.h-page Log in
+  h2.h-page = t(".title")
 
   = form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "form" }) do |f|
     = render "devise/shared/error_messages", resource: resource
@@ -17,7 +17,7 @@
         = f.check_box :remember_me
         = f.label :remember_me
 
-    button.btn-primary type="submit" Log in
+    button.btn-primary type="submit" = t(".submit")
 
   .mt-6.space-y-2
     = render "devise/shared/links"

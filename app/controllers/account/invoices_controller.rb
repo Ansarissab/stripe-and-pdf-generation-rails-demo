@@ -24,6 +24,6 @@ class Account::InvoicesController < ApplicationController
 
   def set_charge
     @charge = current_user_charges.find_by(id: params[:id])
-    redirect_to(account_invoices_path, alert: "Invoice not found.") unless @charge
+    redirect_to(account_invoices_path, alert: t("account.invoices.show.not_found")) unless @charge
   end
 end

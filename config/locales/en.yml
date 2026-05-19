@@ -1,31 +1,142 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
-
 en:
-  hello: "Hello world"
+  app:
+    title: "Stripe PDF Generation Demo"
+    name: "Stripe PDF Generation Demo"
+  nav:
+    dashboard: "Dashboard"
+    subscription: "Subscription"
+    invoices: "Invoices"
+    sign_out: "Sign out"
+    language: "Language"
+    languages:
+      en: "English"
+      fr: "Français"
+    switch_to: "Switch to %{language}"
+  flash:
+    not_authorized: "You are not authorized to perform this action."
+  plans:
+    names:
+      basic: "Basic"
+      pro: "Pro"
+    no_active_plan: "No active plan"
+    price_per_month: "%{price}/mo"
+    summary:
+      basic: "Starter tier. Invoices, PDF downloads."
+      pro: "Everything in Basic, plus priority support."
+  home:
+    show:
+      title: "Dashboard"
+      welcome: "Welcome"
+      signed_in_as: "Signed in as %{email}"
+      current_plan: "Current plan"
+      no_subscription_hint_html: "You don't have an active subscription yet. Pick a plan to unlock invoicing and PDF downloads."
+      choose_plan_cta: "Choose a plan"
+      manage_subscription_cta: "Manage subscription"
+      view_invoices_label: "View invoices"
+  account:
+    subscriptions:
+      new:
+        title: "Choose a plan"
+        intro: "Pick a tier, then pick the experience: redirect to Stripe's hosted Checkout page, or pay inline with Stripe Elements embedded in this app. Both are real subscriptions and produce real invoices."
+        current: "Current"
+        hosted_cta: "Pay with hosted Checkout"
+        embedded_cta: "Pay with embedded form"
+        test_card_html: "Test card: 4242 4242 4242 4242, any future expiry, any CVC, any postal code."
+        threeds: "Use 4000 0025 0000 3155 to exercise 3D Secure."
+      show:
+        title: "Subscription"
+        intro: "Manage your plan, switch tiers, or cancel."
+        current_state: "Current state"
+        plan: "Plan"
+        status: "Status"
+        started: "Started"
+        renews: "Renews"
+        ends: "Ends"
+        portal_cta: "Open Stripe billing portal"
+        cancel_cta: "Cancel subscription"
+        cancel_confirm: "Cancel at period end?"
+        change_plan_cta: "Change plan"
+        no_subscription_html: "You don't have an active subscription yet."
+      embedded:
+        title: "Complete your subscription"
+        plan_line_html: "Plan: %{plan_name} — %{price}."
+        inline_note: "Paid inline with Stripe Elements; no redirect."
+        pay_cta: "Pay %{price}"
+        back: "← Back to plan picker"
+      create:
+        plan_updated: "Plan updated. Stripe prorated the change; the new amount will appear on your next invoice."
+        missing_plan: "Pick Basic or Pro to continue."
+        stripe_error: "Stripe error: %{message}"
+      embedded_action:
+        plan_updated: "Plan updated inline. The new amount will appear on your next invoice."
+      destroy:
+        no_active: "No active subscription to cancel."
+        canceled_at: "Subscription will end on %{date}."
+        period_end_fallback: "the period end"
+        cancel_error: "Couldn't cancel: %{message}"
+      success:
+        thanks: "Thanks! Your subscription is being activated. The page below updates the moment Stripe confirms."
+      cancel_action:
+        wasnt_completed: "Subscription wasn't completed. You can try again any time."
+      billing_portal:
+        portal_error: "Couldn't open billing portal: %{message}"
+    invoices:
+      index:
+        title: "Invoices"
+        intro: "Every successful Stripe charge against your subscription appears here. PDF downloads are generated on the fly."
+        issued: "Issued"
+        plan: "Plan"
+        amount: "Amount"
+        status: "Status"
+        paid: "Paid"
+        refunded: "Refunded"
+        download: "Download PDF"
+        empty: "No invoices yet. After a successful subscription payment, invoices land here automatically."
+        subscribe_cta: "Subscribe"
+      show:
+        not_found: "Invoice not found."
+  active_admin:
+    menus:
+      pay_customers: "Pay Customers"
+      pay_subscriptions: "Pay Subscriptions"
+      pay_charges: "Pay Charges"
+      admin_group: "Admin"
+    dashboard_panels:
+      users:
+        title: "Users"
+        total: "%{count} total"
+        link: "View all users"
+      active_subscriptions:
+        title: "Active subscriptions"
+        total: "%{count} active or trialing"
+        link: "View all subscriptions"
+      charges_this_month:
+        title: "Charges this month"
+        total: "%{count} charge(s)"
+        link: "View all charges"
+    users_show:
+      pay_customers: "Pay customers"
+      current_subscription: "Current subscription"
+      no_subscription: "No subscription."
+      charges: "Charges"
+      charge_count: "%{count} charge(s)."
+    columns:
+      amount: "Amount"
+      refunded: "Refunded"
+  pdf:
+    invoice:
+      heading: "Invoice"
+      number: "Invoice #%{id}"
+      issued: "Issued: %{date}"
+      status: "Status: %{status}"
+      paid: "Paid"
+      refunded: "Refunded"
+      from: "From"
+      bill_to: "Bill to"
+      description: "Description"
+      amount: "Amount"
+      total: "Total"
+      stripe_charge: "Stripe charge: %{id}"
+      footer: "Generated by HexaPDF for the Stripe PDF Generation Demo."
+      charge_fallback: "Charge"
+      subscription_fallback: "Subscription"

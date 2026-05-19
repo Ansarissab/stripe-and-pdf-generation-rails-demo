@@ -1,6 +1,5 @@
 .card
-  h2.h-page
-    = "Edit #{resource_name.to_s.humanize}"
+  h2.h-page = t(".title", resource: resource_name.to_s.humanize)
 
   = form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "form" }) do |f|
     = render "devise/shared/error_messages", resource: resource
@@ -11,16 +10,16 @@
 
     - if devise_mapping.confirmable? && resource.pending_reconfirmation?
       p.form-hint
-        | Currently waiting confirmation for:
+        = t(".waiting_confirmation")
         = resource.unconfirmed_email
 
     .form-field
       = f.label :password, class: "form-label"
       = f.password_field :password, autocomplete: "new-password", class: "form-input"
       p.form-hint
-        | Leave blank if you don't want to change it.
+        = t(".leave_blank_html")
         - if @minimum_password_length
-          |  #{@minimum_password_length} characters minimum.
+          |  #{t(".min_length", minimum: @minimum_password_length)}
 
     .form-field
       = f.label :password_confirmation, class: "form-label"
@@ -29,15 +28,15 @@
     .form-field
       = f.label :current_password, class: "form-label"
       = f.password_field :current_password, autocomplete: "current-password", class: "form-input"
-      p.form-hint We need your current password to confirm your changes.
+      p.form-hint = t(".current_password_hint")
 
-    = f.submit "Update", class: "btn-primary"
+    = f.submit t(".submit"), class: "btn-primary"
 
 .card.mt-6
-  h3.h-section Cancel my account
+  h3.h-section = t(".cancel_section_title")
 
-  p.muted.mb-4 Unhappy? You can cancel your account below. This cannot be undone.
+  p.muted.mb-4 = t(".cancel_intro")
 
-  = button_to "Cancel my account", registration_path(resource_name), method: :delete, class: "btn-danger", data: { confirm: "Are you sure?", turbo_confirm: "Are you sure?" }
+  = button_to t(".cancel_cta"), registration_path(resource_name), method: :delete, class: "btn-danger", data: { confirm: t(".cancel_confirm_html"), turbo_confirm: t(".cancel_confirm_html") }
 
-= link_to "Back", :back, class: "btn-link inline-block mt-6"
+= link_to t(".back"), :back, class: "btn-link inline-block mt-6"

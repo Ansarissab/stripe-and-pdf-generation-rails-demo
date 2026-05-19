@@ -1,5 +1,5 @@
 .card
-  h2.h-page Forgot your password?
+  h2.h-page = t(".title_html")
 
   = form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, class: "form" }) do |f|
     = render "devise/shared/error_messages", resource: resource
@@ -8,7 +8,7 @@
       = f.label :email, class: "form-label"
       = f.email_field :email, autofocus: true, autocomplete: "email", class: "form-input"
 
-    = f.submit "Send me password reset instructions", class: "btn-primary"
+    = f.submit t(".submit"), class: "btn-primary"
 
   .mt-6.space-y-2
     = render "devise/shared/links"

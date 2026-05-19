@@ -1,11 +1,11 @@
 doctype html
-html
+html lang=I18n.locale
   head
     title
-      = content_for(:title) || "Stripe Pdf Generation Demo"
+      = content_for(:title) || t("app.title")
     meta name="viewport" content="width=device-width,initial-scale=1"
     meta name="apple-mobile-web-app-capable" content="yes"
-    meta name="application-name" content="Stripe Pdf Generation Demo"
+    meta name="application-name" content=t("app.name")
     = csrf_meta_tags
     = csp_meta_tag
 
@@ -18,19 +18,26 @@ html
     link rel="icon" href="/icon.svg" type="image/svg+xml"
     link rel="apple-touch-icon" href="/icon.png"
 
-    / Includes all stylesheet files in app/assets/stylesheets
-    = stylesheet_link_tag :app, "data-turbo-track": "reload"
+    / Customer-app stylesheets only. The bare `:app` shortcut would auto-include
+    / every CSS file under app/assets/** -- including `active_admin.css`, whose
+    / un-namespaced `body{...}` / `h1{...}` / normalize.css resets would clobber
+    / the Tailwind look. AA's own layout loads `active_admin.css` separately, so
+    / listing the two customer stylesheets explicitly here keeps the two design
+    / systems strictly siloed.
+    = stylesheet_link_tag "application", "tailwind", "data-turbo-track": "reload"
     = javascript_importmap_tags
 
   body.bg-surface-muted.text-text.min-h-screen
     - if user_signed_in?
       header.bg-surface.border-b.border-[--color-border]
         .mx-auto.max-w-4xl.px-5.py-3.flex.items-center.justify-between
-          = link_to "Dashboard", root_path, class: "btn-link font-semibold"
+          = link_to t("nav.dashboard"), root_path, class: "btn-link font-semibold"
           nav.flex.items-center.gap-4
-            = link_to "Subscription", account_subscription_path, class: "btn-link"
-            = link_to "Invoices",     account_invoices_path,    class: "btn-link"
-            = button_to "Sign out", destroy_user_session_path, method: :delete, class: "btn-link", form: { data: { turbo: false } }
+            = link_to t("nav.subscription"), account_subscription_path, class: "btn-link"
+            = link_to t("nav.invoices"),     account_invoices_path,    class: "btn-link"
+            - other_locale = I18n.locale == :en ? :fr : :en
+            = button_to t("nav.languages.#{other_locale}"), locale_path(locale: other_locale), method: :patch, class: "btn-link", form: { data: { turbo: false } }
+            = button_to t("nav.sign_out"), destroy_user_session_path, method: :delete, class: "btn-link", form: { data: { turbo: false } }
 
     main.page
       = render "shared/flash"

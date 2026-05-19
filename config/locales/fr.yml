@@ -1,0 +1,142 @@
+fr:
+  app:
+    title: "Démo de génération de PDF avec Stripe"
+    name: "Démo de génération de PDF avec Stripe"
+  nav:
+    dashboard: "Tableau de bord"
+    subscription: "Abonnement"
+    invoices: "Factures"
+    sign_out: "Se déconnecter"
+    language: "Langue"
+    languages:
+      en: "English"
+      fr: "Français"
+    switch_to: "Passer à %{language}"
+  flash:
+    not_authorized: "Vous n'êtes pas autorisé à effectuer cette action."
+  plans:
+    names:
+      basic: "Basic"
+      pro: "Pro"
+    no_active_plan: "Aucun forfait actif"
+    price_per_month: "%{price}/mois"
+    summary:
+      basic: "Formule de départ. Factures et téléchargements PDF inclus."
+      pro: "Tout ce qui est inclus dans Basic, plus l'assistance prioritaire."
+  home:
+    show:
+      title: "Tableau de bord"
+      welcome: "Bienvenue"
+      signed_in_as: "Connecté en tant que %{email}"
+      current_plan: "Forfait actuel"
+      no_subscription_hint_html: "Vous n'avez pas encore d'abonnement actif. Choisissez un forfait pour activer la facturation et les téléchargements PDF."
+      choose_plan_cta: "Choisir un forfait"
+      manage_subscription_cta: "Gérer l'abonnement"
+      view_invoices_label: "Voir les factures"
+  account:
+    subscriptions:
+      new:
+        title: "Choisir un forfait"
+        intro: "Choisissez un niveau, puis l'expérience de paiement : redirection vers la page Checkout hébergée par Stripe, ou paiement intégré dans l'application grâce à Stripe Elements. Les deux options créent de vrais abonnements et génèrent de vraies factures."
+        current: "Actuel"
+        hosted_cta: "Payer avec Checkout hébergé"
+        embedded_cta: "Payer avec le formulaire intégré"
+        test_card_html: "Carte de test : 4242 4242 4242 4242, n'importe quelle date d'expiration future, n'importe quel CVC, n'importe quel code postal."
+        threeds: "Utilisez 4000 0025 0000 3155 pour tester 3D Secure."
+      show:
+        title: "Abonnement"
+        intro: "Gérez votre forfait, changez de niveau ou résiliez."
+        current_state: "État actuel"
+        plan: "Forfait"
+        status: "Statut"
+        started: "Démarré le"
+        renews: "Renouvellement"
+        ends: "Fin"
+        portal_cta: "Ouvrir le portail de facturation Stripe"
+        cancel_cta: "Résilier l'abonnement"
+        cancel_confirm: "Résilier à la fin de la période ?"
+        change_plan_cta: "Changer de forfait"
+        no_subscription_html: "Vous n'avez pas encore d'abonnement actif."
+      embedded:
+        title: "Finaliser votre abonnement"
+        plan_line_html: "Forfait : %{plan_name} — %{price}."
+        inline_note: "Paiement intégré avec Stripe Elements ; aucune redirection."
+        pay_cta: "Payer %{price}"
+        back: "← Retour au choix du forfait"
+      create:
+        plan_updated: "Forfait mis à jour. Stripe a calculé le prorata ; le nouveau montant apparaîtra sur votre prochaine facture."
+        missing_plan: "Veuillez choisir Basic ou Pro pour continuer."
+        stripe_error: "Erreur Stripe : %{message}"
+      embedded_action:
+        plan_updated: "Forfait mis à jour en ligne. Le nouveau montant apparaîtra sur votre prochaine facture."
+      destroy:
+        no_active: "Aucun abonnement actif à résilier."
+        canceled_at: "L'abonnement prendra fin le %{date}."
+        period_end_fallback: "la fin de la période"
+        cancel_error: "Impossible d'annuler : %{message}"
+      success:
+        thanks: "Merci ! Votre abonnement est en cours d'activation. La page ci-dessous se mettra à jour dès que Stripe aura confirmé."
+      cancel_action:
+        wasnt_completed: "L'abonnement n'a pas été finalisé. Vous pouvez réessayer à tout moment."
+      billing_portal:
+        portal_error: "Impossible d'ouvrir le portail de facturation : %{message}"
+    invoices:
+      index:
+        title: "Factures"
+        intro: "Chaque paiement Stripe réussi pour votre abonnement apparaît ici. Les téléchargements PDF sont générés à la volée."
+        issued: "Émise le"
+        plan: "Forfait"
+        amount: "Montant"
+        status: "Statut"
+        paid: "Payée"
+        refunded: "Remboursée"
+        download: "Télécharger le PDF"
+        empty: "Aucune facture pour le moment. Après un paiement d'abonnement réussi, les factures apparaîtront ici automatiquement."
+        subscribe_cta: "S'abonner"
+      show:
+        not_found: "Facture introuvable."
+  active_admin:
+    menus:
+      pay_customers: "Clients Pay"
+      pay_subscriptions: "Abonnements Pay"
+      pay_charges: "Paiements Pay"
+      admin_group: "Administration"
+    dashboard_panels:
+      users:
+        title: "Utilisateurs"
+        total: "%{count} au total"
+        link: "Voir tous les utilisateurs"
+      active_subscriptions:
+        title: "Abonnements actifs"
+        total: "%{count} actifs ou en essai"
+        link: "Voir tous les abonnements"
+      charges_this_month:
+        title: "Paiements ce mois-ci"
+        total: "%{count} paiement(s)"
+        link: "Voir tous les paiements"
+    users_show:
+      pay_customers: "Clients Pay"
+      current_subscription: "Abonnement actuel"
+      no_subscription: "Aucun abonnement."
+      charges: "Paiements"
+      charge_count: "%{count} paiement(s)."
+    columns:
+      amount: "Montant"
+      refunded: "Remboursée"
+  pdf:
+    invoice:
+      heading: "Facture"
+      number: "Facture n°%{id}"
+      issued: "Émise le %{date}"
+      status: "Statut : %{status}"
+      paid: "Payée"
+      refunded: "Remboursée"
+      from: "De"
+      bill_to: "Facturé à"
+      description: "Description"
+      amount: "Montant"
+      total: "Total"
+      stripe_charge: "Identifiant Stripe : %{id}"
+      footer: "Généré par HexaPDF pour la démo de génération de PDF avec Stripe."
+      charge_fallback: "Frais"
+      subscription_fallback: "Abonnement"

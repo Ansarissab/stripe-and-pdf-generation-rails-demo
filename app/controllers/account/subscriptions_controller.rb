@@ -16,8 +16,7 @@ class Account::SubscriptionsController < ApplicationController
 
     if billing.active_subscription
       billing.swap_plan(price_id: price_id)
-      redirect_to account_subscription_path,
-                  notice: "Plan updated. Stripe prorated the change; the new amount will appear on your next invoice."
+      redirect_to account_subscription_path, notice: t(".plan_updated")
     else
       session = billing.start_hosted_checkout(
         price_id:    price_id,
@@ -39,7 +38,7 @@ class Account::SubscriptionsController < ApplicationController
     if billing.active_subscription
       billing.swap_plan(price_id: price_id)
       return redirect_to(account_subscription_path,
-                         notice: "Plan updated inline. The new amount will appear on your next invoice.")
+                         notice: t("account.subscriptions.embedded_action.plan_updated"))
     end
 
     @client_secret = billing.start_embedded_subscription(price_id: price_id)
@@ -50,24 +49,24 @@ class Account::SubscriptionsController < ApplicationController
   end
 
   def destroy
-    return redirect_to(account_subscription_path, alert: "No active subscription to cancel.") unless @subscription
+    return redirect_to(account_subscription_path, alert: t(".no_active")) unless @subscription
 
     authorize @subscription, policy_class: Pay::SubscriptionPolicy
     @subscription.cancel
+    end_date = @subscription.reload.ends_at&.to_date || t(".period_end_fallback")
     redirect_to account_subscription_path,
-                notice: "Subscription will end on #{@subscription.reload.ends_at&.to_date || 'the period end'}."
+                notice: t(".canceled_at", date: end_date)
   rescue Pay::Error, Stripe::StripeError => e
-    redirect_to account_subscription_path, alert: "Couldn't cancel: #{e.message}"
+    redirect_to account_subscription_path, alert: t(".cancel_error", message: e.message)
   end
 
   def success
-    redirect_to account_subscription_path,
-                notice: "Thanks! Your subscription is being activated. The page below updates the moment Stripe confirms."
+    redirect_to account_subscription_path, notice: t(".thanks")
   end
 
   def cancel
     redirect_to new_account_subscription_path,
-                alert: "Subscription wasn't completed. You can try again any time."
+                alert: t("account.subscriptions.cancel_action.wasnt_completed")
   end
 
   def billing_portal
@@ -75,7 +74,7 @@ class Account::SubscriptionsController < ApplicationController
     portal = billing.open_billing_portal(return_url: absolute_url(account_subscription_path))
     redirect_to portal.url, allow_other_host: true
   rescue Pay::Error, Stripe::StripeError => e
-    redirect_to account_subscription_path, alert: "Couldn't open billing portal: #{e.message}"
+    redirect_to account_subscription_path, alert: t(".portal_error", message: e.message)
   end
 
   private
@@ -97,12 +96,14 @@ class Account::SubscriptionsController < ApplicationController
   end
 
   def missing_plan_redirect
-    redirect_to new_account_subscription_path, alert: "Pick Basic or Pro to continue."
+    redirect_to new_account_subscription_path,
+                alert: t("account.subscriptions.create.missing_plan")
   end
 
   def stripe_failure_redirect(error)
     Rails.logger.error("[#{action_name}] #{error.class}: #{error.message}")
-    redirect_to new_account_subscription_path, alert: "Stripe error: #{error.message}"
+    redirect_to new_account_subscription_path,
+                alert: t("account.subscriptions.create.stripe_error", message: error.message)
   end
 
   def absolute_url(path)

@@ -1,5 +1,5 @@
 .card
-  h2.h-page Resend confirmation instructions
+  h2.h-page = t(".title")
 
   = form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post, class: "form" }) do |f|
     = render "devise/shared/error_messages", resource: resource
@@ -10,7 +10,7 @@
         value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email),
         class: "form-input"
 
-    = f.submit "Resend confirmation instructions", class: "btn-primary"
+    = f.submit t(".submit"), class: "btn-primary"
 
   .mt-6.space-y-2
     = render "devise/shared/links"

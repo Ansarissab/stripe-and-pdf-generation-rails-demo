@@ -7,8 +7,14 @@ module PlansHelper
 
   def plan_badge(user)
     classes = PLAN_BADGE_CLASSES[user.plan]
-    label   = user.plan&.titleize || "No active plan"
+    label   = plan_label(user.plan)
     content_tag(:span, label, class: "inline-block px-3 py-1 rounded-full text-sm font-medium #{classes}")
+  end
+
+  def plan_label(plan)
+    return I18n.t("plans.no_active_plan") if plan.blank?
+
+    I18n.t("plans.names.#{plan}", default: plan.titleize)
   end
 
   def plan_price_cents(plan_key)
@@ -22,7 +28,7 @@ module PlansHelper
     cents = plan_price_cents(plan_key)
     return "" unless cents
 
-    "$#{format('%.2f', cents / 100.0)}/mo"
+    I18n.t("plans.price_per_month", price: "$#{format('%.2f', cents / 100.0)}")
   end
 
   def plan_price_id(plan_key)

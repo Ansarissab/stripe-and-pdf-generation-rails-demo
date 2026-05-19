@@ -236,6 +236,37 @@ Use fixtures, not factories. Mock at the boundary, not inside models.
 **No `respond_to` block when templates exist for both formats.**
 Rails infers format from templates automatically.
 
+## Testing architecture
+
+Minitest, fixtures, no system tests. The suite mirrors `app/` 1:1:
+
+```text
+test/
+  controllers/   # mirrors app/controllers/, including Account:: namespace
+  models/        # AR models + concerns/
+  policies/      # mirrors app/policies/, including pay/ subdir
+  pdfs/          # mirrors app/pdfs/
+  views/         # ActionView::TestCase smoke tests for Slim templates
+  support/       # shared helpers, auto-required by test_helper.rb
+  fixtures/      # YAML fixtures — the only data source
+```
+
+WebMock is wired in `test_helper.rb` with `disable_net_connect!(allow_localhost: true)`. SimpleCov starts in **`config/boot.rb`** (before Rails — `bin/rails test` runs `test:prepare` which boots the app *before* `test_helper.rb` is loaded, so the SimpleCov hook has to fire even earlier). Per-worker resultsets are merged via `parallelize_setup`/`parallelize_teardown` and the parent process is suppressed with `SimpleCov.external_at_exit = true` so it can't clobber the merge. `dotenv-rails` loads `.env` in the `test` env too, so `test_helper.rb` sets `Stripe.api_key` and `PAY_STRIPE_PLAN_*` with `||=` — tests work with or without a developer's `.env`.
+
+The 5 rules, in priority order:
+
+1. **Fixtures, not factory_bot.** The "Tests should not shape design" rule above applies: no factories, no `build_stubbed`, no DSLs that exist purely to make tests easier to write. Fixtures in `test/fixtures/` are the only data source. The only allowed dynamic builders are the `test/support/` helpers (currently `setup_billing(user, plan:, processor_id:)`), which exist to DRY up genuine Pay STI boilerplate — not to replace fixtures.
+2. **Mock at the boundary (WebMock), never deeper.** Stub Stripe at the HTTP layer via the helpers in `test/support/stripe_stubs.rb`. Never stub `Stripe::Customer.create` or any other SDK method directly. The real Stripe Ruby SDK runs against the WebMock stub, which is what catches SDK-version drift (see §9.7 in the Stripe runbook for an example of why this matters).
+3. **One shared helper file per concern in `test/support/`.** Today that is `stripe_stubs.rb` (Stripe REST stubs) and `billing_fixtures.rb` (Pay STI plumbing). Add to these rather than creating new files when a stub or helper is missing. If something is used only in one test, inline it there.
+4. **Plain `assert` / `refute` for everything, including policies.** No shoulda-matchers, no `pundit-matchers`. Test policies as `Policy.new(user, record).action?` and assert on the boolean. Cover both class-shaped (`authorize Pay::Subscription, :create?`) and instance-shaped (`authorize @sub`) calls.
+5. **Coverage gate: SimpleCov line coverage, 90% minimum.** `bin/rails test` regenerates `coverage/index.html` on every run. The `coverage/` folder is gitignored in full — it is regenerated, never checked in.
+
+**Common pitfalls** (full entries live in the Stripe runbook, [docs/stripe_integration/README.md](docs/stripe_integration/README.md) §9):
+
+- **Pay STI scoping in tests.** Create subs as `Pay::Stripe::Subscription`, not `Pay::Subscription` — `Pay::Stripe::Customer#subscriptions` is scoped to the STI subclass, so a bare `Pay::Subscription` row is invisible to the customer association (and therefore to `current_subscription`).
+- **`Pay::Subscription#cancel` is a POST, not a DELETE, and needs `cancel_at` in the response.** WebMock stubs for cancel must return `cancel_at` (Pay calls `Time.at(cancel_at)` to set `ends_at` — `Time.at(nil)` raises `TypeError`).
+- **SimpleCov + Rails 8 parallel testing.** `bin/rails test` runs `test:prepare` which boots Rails *before* `test_helper.rb` loads, so `SimpleCov.start` has to live in `config/boot.rb`. `SimpleCov.at_fork` is **harmful** here — calling it in each worker re-runs `SimpleCov.start` and detaches the inherited Coverage probes from already-loaded files (Billing, PlanSync). The canonical setup lives in `config/boot.rb` + `config/simplecov_setup.rb` + the empty `parallelize_setup` rename in `test_helper.rb` — read those when in doubt rather than reinventing.
+
 ## What this app is NOT
 
 - Not a multi-tenant app

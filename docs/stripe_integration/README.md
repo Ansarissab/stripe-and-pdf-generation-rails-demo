@@ -386,6 +386,48 @@ config.hosts << /.*\.taile00403\.ts\.net/   # use your own tailnet ID
 **Cause**: Default Rails 8 dev config turns on a lot of debugging niceties that compound: `verbose_query_logs`, `query_log_tags_enabled`, `verbose_enqueue_logs`, `verbose_redirect_logs`, `annotate_rendered_view_with_filenames`, and Bullet's `add_footer` + `console` + `bullet_logger`.
 **Fix**: Flip the noisiest off (see [config/environments/development.rb](../../config/environments/development.rb)). Keep `Bullet.rails_logger = true` so N+1s still land in `log/development.log`.
 
+### 9.22 Pay STI scoping makes `current_subscription` invisible in tests
+**Symptom**: Test creates `Pay::Subscription.create!(customer: pay_customer, ...)` for a `Pay::Stripe::Customer`, then `pay_customer.subscription` (or `Billing#current_subscription`) returns `nil` even though the row exists in the DB.
+**Cause**: `Pay::Stripe::Customer#subscriptions` is declared with `class_name: "Pay::Stripe::Subscription"`, so the association only sees rows whose `type` column matches the STI subclass. A bare `Pay::Subscription` row is invisible to the customer association. Pre-existing tests that query `Pay::Subscription.where(customer_id: ...)` directly (e.g. `plan_sync_test.rb`) get away with it — anything that touches the customer-side association breaks.
+**Fix**: Create through the STI subclass in tests:
+```ruby
+Pay::Stripe::Subscription.create!(
+  customer: pay_customer,
+  processor_id: "sub_test",
+  name: "default",
+  processor_plan: ENV["PAY_STRIPE_PLAN_BASIC"],
+  status: "active"
+)
+```
+The shared `setup_billing(user, plan:, processor_id:)` helper in `test/support/billing_fixtures.rb` does this correctly — use it instead of hand-rolling the boilerplate.
+
+### 9.23 `Pay::Subscription#cancel` WebMock stub raises `TypeError: can't convert NilClass into an exact number`
+**Symptom**: Test calls `subscription.cancel` against a WebMock stub of `POST /v1/subscriptions/sub_xxx`, deep stack trace ends in `Time.at(nil)`.
+**Cause**: Pay's `cancel` is a **POST**, not a DELETE — it sets `cancel_at_period_end: true`. Pay then reads `@api_record.cancel_at` from the Stripe response and feeds it to `Time.at(...)` to compute the local `ends_at` timestamp. If `cancel_at` is missing or nil, `Time.at(nil)` raises `TypeError` from inside Pay (not from your test).
+**Fix**: The cancel stub must return `cancel_at` as a Unix timestamp:
+```ruby
+stub_request(:post, "https://api.stripe.com/v1/subscriptions/#{processor_id}")
+  .with(body: hash_including("cancel_at_period_end" => "true"))
+  .to_return(
+    status: 200,
+    headers: { "Content-Type" => "application/json" },
+    body: {
+      id: processor_id,
+      object: "subscription",
+      status: "active",
+      cancel_at_period_end: true,
+      cancel_at: Time.now.to_i + 30 * 24 * 3600
+    }.to_json
+  )
+```
+The canonical helper lives in `test/support/stripe_stubs.rb` as `stub_stripe_subscription_cancel(id:)`; reach for it before rolling your own.
+
+### 9.24 SimpleCov reports near-zero coverage for code that is clearly tested
+**Symptom**: `bin/rails test` runs the full suite green, but `coverage/index.html` shows obviously-tested concerns (Billing, PlanSync) at 0% line coverage. Headline number is wildly under-reporting.
+**Cause**: `bin/rails test` (no path arg) runs the `test:prepare` rake task **before** loading `test_helper.rb`. `test:prepare` boots Rails, which runs every `to_prepare` initializer and loads the Billing concern, PlanSync, etc. If `SimpleCov.start` is called inside `test_helper.rb`, those files are already loaded *without* `Coverage` probes — workers inherit probe-less bytecode and record nothing.
+A secondary trap: trying to "fix" this with `SimpleCov.at_fork.call(worker)` in `parallelize_setup` makes it **worse**. `at_fork` re-runs `SimpleCov.start` in the child, which detaches the parent's inherited probes from any file already in memory — so the file goes from "tracked but inherited" to "untracked at all".
+**Fix**: Start SimpleCov in `config/boot.rb` (the very first Ruby file Bundler runs, before Rails). The actual configuration lives in [config/simplecov_setup.rb](../../config/simplecov_setup.rb). In `test_helper.rb`, `parallelize_setup` only renames the per-worker resultset (`SimpleCov.command_name "Worker-#{worker}"`) and does NOT call `at_fork`; the parent's empty resultset is suppressed via `SimpleCov.external_at_exit = true`. With this layout the headline number is honest and parallel testing keeps working.
+
 ---
 
 ## 10. Production checklist (Kamal)

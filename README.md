@@ -68,11 +68,17 @@ Production secrets are loaded by Kamal from `.kamal/secrets` (gitignored), not f
 Minitest with fixtures (no factories, per [AGENTS.md](AGENTS.md)).
 
 ```sh
-bin/rails test                          # everything
+bin/rails test                          # everything (parallel)
 bin/rails test test/models/user_test.rb # one file
 ```
 
-`db:test:prepare` runs implicitly before the suite.
+`db:test:prepare` runs implicitly before the suite. The runner parallelises across CPU cores.
+
+SimpleCov writes a line-coverage report to `coverage/index.html` on every run. A 90% minimum is the gate (added once Agent D's parallel-coverage fix lands). The whole `coverage/` folder is gitignored — it is regenerated per run.
+
+New tests mirror `app/` 1:1 under `test/` (`controllers/`, `models/`, `policies/`, `pdfs/`, `views/`). Shared helpers — WebMock stubs for Stripe REST endpoints, Pay STI fixtures — live in `test/support/` and are auto-required by `test_helper.rb`. Add to the existing helper files rather than creating new ones.
+
+The full rules (mocking at the boundary, no factory_bot, Pundit testing pattern) live in the **Testing architecture** section of [AGENTS.md](AGENTS.md). Test-time Stripe gotchas (Pay STI scoping, cancel-stub double-field requirement, SimpleCov + parallel testing) are catalogued in [docs/stripe_integration/README.md §9](docs/stripe_integration/README.md#9-troubleshooting--every-error-we-hit-in-order).
 
 ## Code quality
 

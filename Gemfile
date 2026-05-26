@@ -89,7 +89,7 @@ group :development do
   gem "web-console"
 
   # N+1 query detector and unused eager-loading detector
-  gem "bullet", "8.1.1"
+  gem "bullet", "8.1.2"
 
   # Catches outbound mail in dev and browse it at /letter_opener -- pairs with
   # Devise :confirmable so the confirmation links are clickable without SMTP.
